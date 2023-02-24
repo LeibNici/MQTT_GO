@@ -1,0 +1,5 @@
+mqtt:
+  host: 120.46.161.188
+  port: 1883
+  username: admin
+  password: admin123
