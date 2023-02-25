@@ -1,5 +1,5 @@
 mqtt:
-  host: 120.46.161.188
-  port: 1883
+  host: 119.167.159.196
+  port: 11883
   username: admin
   password: admin123
