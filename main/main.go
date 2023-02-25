@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"gopkg.in/yaml.v3"
@@ -8,6 +9,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 )
 
 var ConfigYML Config
@@ -47,10 +49,9 @@ func main() {
 		if _, err := fmt.Scanf("%s %s\n", &topic, &tag); err != nil {
 			fmt.Print("error")
 		} else {
-			fmt.Printf("%v %v\n", topic, tag)
 			if token := MqttClient.Subscribe(topic+"/"+tag, 0, func(client mqtt.Client, msg mqtt.Message) {
-				//if token := MqttClient.Subscribe("test/#", 0, func(client mqtt.Client, msg mqtt.Message) {
-				fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
+				fmt.Printf("收到消息：" + string(msg.Payload()) + "\n")
+				WriteDate(string(msg.Payload()))
 			}); token.Wait() && token.Error() != nil {
 				fmt.Println(token.Error())
 				os.Exit(1)
@@ -58,16 +59,12 @@ func main() {
 		}
 	case 2:
 		fmt.Println()
+		ReadDate()
 	default:
 		fmt.Println("error")
 	}
 
-	//等待信号
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
-
-	MqttClient.Disconnect(250)
+	WaitSignal()
 }
 
 func ReadConfigYaml() {
@@ -106,5 +103,53 @@ func MqttSub(topic string, tag string) {
 	}); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())
 		os.Exit(1)
+	}
+}
+
+func MqttPub(data string, topic string) {
+	token := MqttClient.Publish(topic, 0, false, data)
+	token.WaitTimeout(5 * time.Second)
+	if token.Error() != nil {
+		fmt.Println(token.Error())
+		os.Exit(1)
+	}
+}
+
+func WaitSignal() {
+	//等待信号
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	MqttClient.Disconnect(250)
+}
+
+func WriteDate(data string) {
+	file, err := os.OpenFile("data-"+time.Now().Format("2006-01-02")+".txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("打开文件失败：", err)
+		return
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(data + "\n"); err != nil {
+		panic(err)
+	}
+}
+
+func ReadDate() {
+	file, err := os.Open("data-2023-02-25.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Println(err)
+		return
 	}
 }
