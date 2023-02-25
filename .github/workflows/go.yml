@@ -33,7 +33,7 @@ jobs:
 
       - name: Get Release ID
         id: get_release_id
-        run: echo "::set-env name=release_id::$(echo ${{ steps.create_release.outputs.id }} | tr -d '\r')"
+        run: echo "::set-output name=release_id::$(echo ${{ steps.create_release.outputs.id }} | tr -d '\r')"
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
