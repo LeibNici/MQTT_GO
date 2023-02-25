@@ -38,7 +38,7 @@ jobs:
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         with:
-          asset_path: ./bin/my-app
-          asset_name: my-app
+          asset_path: ./
+          asset_name: my
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           release_id: ${{ env.release_id }}
