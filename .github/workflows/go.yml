@@ -18,7 +18,7 @@ jobs:
           go-version: '1.19'
 
       - name: Build
-        run: go build -o my ./main/main.go
+        run: go build -o myapp ./main/main.go
 
       - name: Create Release
         id: create_release
@@ -38,6 +38,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./
-          asset_name: my
+          asset_path: ./myapp
+          asset_name: myapp
           asset_content_type: application/octet-stream
