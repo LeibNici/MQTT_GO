@@ -18,7 +18,7 @@ jobs:
           go-version: '1.19'
 
       - name: Build
-        run: go build -o myapp ./main/main.go
+        run: go build -o myapp ./main.go
 
       - name: Create Release
         id: create_release
